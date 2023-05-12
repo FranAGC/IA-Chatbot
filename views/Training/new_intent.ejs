@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+    <%- include('../Fixed/Header.ejs'); %>
+    
+    <body class="skin-black">
+        <%- include('../Fixed/HeaderLogo.ejs'); %>
+
+
+        <div class="wrapper row-offcanvas row-offcanvas-left">
+            <%- include('../Fixed/NavBar.ejs'); %>
+
+            <!-- Right side column. Contains the navbar and content of the page -->
+            <aside class="right-side">    
+                
+                 <!-- Main content -->
+                 <section class="content">                        
+                    <div class="row">
+                       <div class="col-md-12">
+                           <!-- general form elements -->
+                           <div class="box box-primary">
+                               <div class="box-header">
+                                   <h3 class="box-title">New Intent</h3>
+                               </div><!-- /.box-header -->
+                               <!-- form start -->
+                               <form role="form">
+                                   <div class="box-body">
+                                       <div class="form-group">
+                                           <label for="exampleInputEmail1">Tag</label>
+                                           <input type="text" class="form-control" id="tag">
+                                       </div>
+                                       <div class="form-group">
+                                           <label for="exampleInputPassword1">Title</label>
+                                           <input type="text" class="form-control" id='title'>
+                                       </div>
+                                       <div class="form-group">                                                                   
+                                            <table class="table table-bordered" id="tableIR"> 
+                                                <tr>
+                                                    <th style="width: 90%">Patterns</th>
+                                                    <th>Action</th>                                                       
+                                                </tr>   
+                                                <tr id="textC">
+                                                    <td><input type="text" class="form-control newpattern" placeholder='Type new pattern'></td>
+                                                    <td><button class="btn btn-sm btn-success appendB" type="button" onclick="BtnaddA()">Add <i class="fas fa-save"></i></button></td>  
+                                                </tr>                                                                          
+                                            </table>
+                                       </div>   
+                                       <div class="form-group">                                                                   
+                                            <table class="table table-bordered" id="tableIP"> 
+                                                <tr>
+                                                    <th style="width: 90%">Response</th>
+                                                    <th>Action</th>                                                       
+                                                </tr>   
+                                                <tr id="textB">
+                                                    <td><input type="text" class="form-control newresponse" placeholder='Type new response'></td>
+                                                    <td><button class="btn btn-sm btn-success appendB" type="button" onclick="BTNadd()">Add <i class="fas fa-save"></i></button></td>  
+                                                </tr>                                                                             
+                                            </table>
+                                       </div>                                                                          
+                                   </div>
+                                   <div class="box-footer text-center">
+                                       <button type="button" class="btn btn-primary btn-lg" onclick="Save()">Save</button>
+                                   </div>
+                               </form>
+                           </div>
+                       </div>
+                    </div>
+            </section><!-- /.content -->
+             
+            </aside><!-- /.right-side -->
+        </div><!-- ./wrapper -->
+
+
+        <%- include('../Fixed/footer.ejs'); %>   
+        
+        <script>
+            
+            var response = [];
+            var pattern = [];
+
+            function BtnaddA() {
+                var textinp = $( '.newpattern' ).val();
+                if(textinp.trim().length > 0){                  
+                    var tr = $('#textC');
+                    tr.css("background-color","#FF3700");
+                    pattern.push(textinp);
+                    tr.fadeOut(400, function(){
+                        tr.remove();
+                    });
+                    $( "#tableIR" ).append('<tr id="'+pattern.length+'"><td>'+textinp+'</td><td><button class="btn btn-sm btn-danger"type="button" value="'+pattern.length+'" onclick="DeletePattern(this)">Delete <i class="fas fa-trash"></i></button></td></tr>')
+                    $( "#tableIR" ).append( '<tr id="textC"><td><input type="text" class="form-control newpattern" placeholder="Type new pattern"></td><td><button class="btn btn-sm btn-success" onclick="BtnaddA()" type="button">Add <i class="fas fa-save"></i></button></td></tr>' );
+                }             
+            }
+       
+            function BTNadd() {
+                var textinp = $( '.newresponse' ).val();
+                if(textinp.trim().length > 0){                  
+                    var tr = $('#textB');
+                    tr.css("background-color","#FF3700");
+                    response.push(textinp);
+                    tr.fadeOut(400, function(){
+                        tr.remove();
+                    });
+                    $( "#tableIP" ).append('<tr id="'+response.length+'"><td>'+textinp+'</td><td><button class="btn btn-sm btn-danger" type="button" value="'+response.length+'" onclick="DeleteResponse(this)">Delete <i class="fas fa-trash"></i></button></td></tr>')
+                    $( "#tableIP" ).append( '<tr id="textB"><td><input type="text" class="form-control newresponse" placeholder="Type new response"></td><td><button class="btn btn-sm btn-success" onclick="BTNadd()" type="button">Add <i class="fas fa-save"></i></button></td></tr>' );
+                }             
+            }            
+            
+            function Save(){
+                if($('#tag').val() && $('#title').val()){
+                    $.ajax({
+                        type: "POST",
+                        url: "/api/intent/new",
+                        data: {                    
+                            tag: $('#tag').val(),
+                            patterns: JSON.stringify(pattern),
+                            title: $('#title').val(),
+                            response: JSON.stringify(response)                    
+                        },
+                        success: function(msg){                             
+                            swal("Success !!", msg, "success");
+                            setTimeout(function(){
+                                location.reload();
+                            },1000)
+                        },
+                        error: function(XMLHttpRequest, textStatus, errorThrown) {
+                            sweetAlert("Oops...", XMLHttpRequest.responseText, "error");
+                        }
+                    });                                 
+                }else{
+                    sweetAlert("Oops...", 'Required fields Tag and Title.', "error");
+                }       
+            }
+
+            function DeleteResponse(v){                
+                document.getElementById(v.value).remove();   
+                response.splice(parseInt(v.value -1), 1);            
+            }
+
+            function DeletePattern(v){                
+                document.getElementById(v.value).remove();   
+                pattern.splice(parseInt(v.value -1), 1);            
+            }
+              
+        </script>
+            
+    </body>
+</html>

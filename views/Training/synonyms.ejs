@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+    <%- include('../Fixed/Header.ejs'); %>
+    
+    <body class="skin-black">
+        <%- include('../Fixed/HeaderLogo.ejs'); %>
+
+
+        <div class="wrapper row-offcanvas row-offcanvas-left">
+            <%- include('../Fixed/NavBar.ejs'); %>
+
+            <!-- Right side column. Contains the navbar and content of the page -->
+            <aside class="right-side">    
+                
+                <!-- Main content -->
+                <section class="content">                        
+                        <div class="table-responsive">
+                            <div class="col-sm-12 text-center">
+                                <button class="btn btn-info" onclick="window.location.href='/admin/new/synonym'"><i class="fa fa-plus-square"></i> Nuevo sinonimo </button>                                     
+                            </div>
+                            <br> <br>  
+                            <!-- .table - Uses sparkline charts-->
+                            <div class="col-sm-12">                                
+                                <table class="table table-striped text-center" id="synons">   
+                                    <thead>                         
+                                        <tr>
+                                            <th>Title</th>
+                                            <th>Key Word</th>                                    
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% synonyms.forEach(function(customer){ %>
+                                            <tr>                
+                                                <td> <%= customer.title %> </td>                      
+                                                <td> <a href="/admin/editkey/<%= customer.keyWord %>"><%= customer.keyWord %> </a> </td>                                        
+                                                <td> <button class="btn btn-sm btn-danger" onclick="Delete('<%= customer.keyWord %>')"><i class="fas fa-trash"></i></button></td>
+                                            </tr>
+                                        <% }) %> 
+                                    </tbody>                                    
+                                </table><!-- /.table -->
+                            </div>
+                        </div>
+                </section><!-- /.content -->
+                
+            </aside><!-- /.right-side -->
+        </div><!-- ./wrapper -->
+
+
+        <%- include('../Fixed/footer.ejs'); %>
+
+        <script>
+            function Delete(v){
+                swal({
+                    title: "Are you sure to delete ?",
+                    text: "You will not be able to recover this synonym !!",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes, delete it !!",
+                    closeOnConfirm: false
+                },
+                function(){
+                    $.ajax({
+                        type: "POST",
+                        url: "/api/synonym/delete",
+                        data: {                    
+                            tag: v                                         
+                        },
+                        success: function(msg){                             
+                            swal("Success !!", msg, "success");
+                            setTimeout(function(){
+                                location.reload();
+                            },1000)
+                        },
+                        error: function(XMLHttpRequest, textStatus, errorThrown) {
+                            sweetAlert("Oops...", XMLHttpRequest.responseText, "error");
+                        }
+                    }); 
+                    swal("Deleted !!", "Intent deleted", "success");
+                });
+            }
+
+            $( document ).ready(function() {
+                $('#synons').DataTable({
+                    "bPaginate": true,
+                    "bLengthChange": false,
+                    "bFilter": true,
+                    "bInfo": false,
+                    "bAutoWidth": false
+                });
+            })
+
+        </script>
+            
+    </body>
+</html>
